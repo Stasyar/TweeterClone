@@ -1,0 +1,16 @@
+stages:
+  - lint_and_test
+
+lint_and_test:
+  image: python:3.11
+  stage: lint_and_test
+  before_script:
+    - pip install poetry 
+  script:
+    - poetry install --no-dev 
+    - poetry install --dev 
+    - poetry run black --check .
+    - poetry run isort --check --profile black .
+    - poetry run flake8 .
+    - poetry run mypy .
+    - poetry run pytest
