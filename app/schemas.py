@@ -13,8 +13,12 @@ class TweetCreateResponse(BaseModel):
     tweet_id: int
 
 
-class TweetDeleteResponse(BaseModel):
+class ResponseWithBool(BaseModel):
     result: bool
+
+
+
+
 
 
 
