@@ -10,4 +10,3 @@ class Like(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     tweet_id = Column(Integer, ForeignKey("tweet.id"), nullable=False)
 
-    __table_args__ = (UniqueConstraint("user_id", "tweet_id", name="unique_like"),)

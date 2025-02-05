@@ -4,8 +4,8 @@ from pydantic import BaseModel
 
 
 class TweetCreateRequest(BaseModel):
-    tweet_data: str
-    tweet_media_ids: Optional[List[int]] = None
+    content: str
+    media: Optional[List[int]] = None
 
 
 class TweetCreateResponse(BaseModel):
@@ -13,5 +13,10 @@ class TweetCreateResponse(BaseModel):
     tweet_id: int
 
 
-class UserCreate(BaseModel):
-    api_key: str
+class TweetDeleteResponse(BaseModel):
+    result: bool
+
+
+
+
+

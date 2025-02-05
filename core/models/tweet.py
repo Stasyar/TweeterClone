@@ -12,7 +12,5 @@ class Tweet(Base):
     content = Column(String(280), nullable=False)
     media = Column(ARRAY(Integer))
 
-    author = relationship("User", backref="tweets")
-
     def __repr__(self):
         return f"Tweet {self.id}"

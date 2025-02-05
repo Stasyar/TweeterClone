@@ -10,6 +10,3 @@ class Follow(Base):
     follower_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     following_id = Column(Integer, ForeignKey("user.id"), nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint("follower_id", "following_id", name="unique_follow"),
-    )

@@ -10,7 +10,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     api_key = Column(String, unique=True, nullable=False)
 
-    tweets = relationship("Tweet", back_populates="author")
+    tweets = relationship("Tweet", backref="author")
 
     def __repr__(self):
         return f"User {self.id}"

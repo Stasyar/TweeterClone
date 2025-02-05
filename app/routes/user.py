@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 
 from app.crud import get_users, post_user
-from app.schemas import UserCreate
+
 from core.models import User, db_helper
 
 router = APIRouter()
@@ -15,6 +15,6 @@ async def api_get_user():
 
 
 @router.post("/user/")
-async def api_post_user(user: UserCreate):
-    new_user = User(api_key=user.api_key)
+async def api_post_user(api_key: str = Header(...)):
+    new_user = User(api_key=api_key)
     return await post_user(ss, new_user)
