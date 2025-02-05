@@ -1,5 +1,5 @@
 from sqlalchemy import ARRAY, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import relationship
 
 from core.models.base import Base
 
@@ -7,12 +7,12 @@ from core.models.base import Base
 class Tweet(Base):
     __tablename__ = "tweet"
 
-    data: String = Column(String(200), nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False)
+    author_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    content = Column(String(280), nullable=False)
     media = Column(ARRAY(Integer))
-    likes = Column(ARRAY(Integer))
 
-    author_id = Column(Integer, ForeignKey("user.id"))
-    author = relationship("User", back_populates="tweets")
+    author = relationship("User", backref="tweets")
 
     def __repr__(self):
         return f"Tweet {self.id}"

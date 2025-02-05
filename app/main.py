@@ -1,11 +1,9 @@
-from contextlib import asynccontextmanager
-
 import uvicorn
 from fastapi import FastAPI
 
 from app.routes.tweet import router as tweet_router
+from app.routes.user import router as user_router
 from core.models import Base, db_helper
-
 
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
@@ -34,6 +32,7 @@ async def shutdown():
 
 
 app.include_router(tweet_router)
+app.include_router(user_router)
 
 
 if __name__ == "__main__":

@@ -11,3 +11,7 @@ class TweetCreateRequest(BaseModel):
 class TweetCreateResponse(BaseModel):
     result: bool
     tweet_id: int
+
+
+class UserCreate(BaseModel):
+    api_key: str

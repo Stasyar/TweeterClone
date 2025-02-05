@@ -3,8 +3,14 @@ __all__ = (
     "DBHelper",
     "db_helper",
     "User",
+    "Tweet",
+    "Like",
+    "Follow",
 )
 
 from core.models.base import Base
 from core.models.db_helper import DBHelper, db_helper
+from core.models.follow import Follow
+from core.models.like import Like
+from core.models.tweet import Tweet
 from core.models.user import User

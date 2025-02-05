@@ -1,5 +1,5 @@
-from sqlalchemy import ARRAY, Column, Integer
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from core.models.base import Base
 
@@ -7,8 +7,8 @@ from core.models.base import Base
 class User(Base):
     __tablename__ = "user"
 
-    followers = Column(ARRAY(Integer))
-    following = Column(ARRAY(Integer))
+    id = Column(Integer, primary_key=True, nullable=False)
+    api_key = Column(String, unique=True, nullable=False)
 
     tweets = relationship("Tweet", back_populates="author")
 
