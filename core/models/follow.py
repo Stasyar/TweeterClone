@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Integer
 
 from core.models.base import Base
 
@@ -9,4 +9,3 @@ class Follow(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     follower_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     following_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-

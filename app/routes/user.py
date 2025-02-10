@@ -1,47 +1,113 @@
-from fastapi import APIRouter, Header, Path
+from typing import Union
 
-from app.crud import get_users, get_user_by_key, follow, unfollow
-from app.schemas import ResponseWithBool
+from fastapi import APIRouter, Header, HTTPException, Path
 
-from core.models import User, db_helper
+from app.crud import (
+    check_user,
+    follow,
+    get_followers,
+    get_followings,
+    get_user_by_id,
+    unfollow,
+)
+from app.schemas import (
+    ErrorResponse,
+    FollowUserSchema,
+    MeResponceSchema,
+    ResponseWithBool,
+    UserSchema,
+)
+from core.models import db_helper
 
 router = APIRouter()
 
 ss = db_helper.session
+default_api_key = Header(...)
+default_path = Path(...)
 
 
-@router.get("/user/")
-async def api_get_user():
-    return await get_users(ss)
-
-
-@router.post("/user/")
-async def api_post_user(api_key: str = Header(...)):
-    return await get_user_by_key(ss, api_key=api_key)
-
-
-@router.post("/api/users/{user_id}/follow/", response_model=ResponseWithBool)
+@router.post("/api/users/{user_id}/follow/")
 async def api_follow(
-        api_key: str = Header(...),
-        user_id: int = Path(..., description="User ID")
-) -> ResponseWithBool:
+    api_key: str = default_api_key,
+    user_id: int = default_path,
+) -> Union[ResponseWithBool, ErrorResponse]:
 
-    follower: User = await get_user_by_key(session=ss, api_key=api_key)
+    try:
+        follower = await check_user(session=ss, api_key=api_key)
+        if await follow(ss, follower_id=follower.id, following_id=user_id):
+            return ResponseWithBool(result=True)
+        else:
+            return ResponseWithBool(result=False)
 
-    if await follow(ss, follower_id=follower.id, following_id=user_id):
+    except Exception as e:
+        return ErrorResponse(
+            result=False, error_type=type(e).__name__, error_message=str(e)
+        )
+
+
+@router.delete("/api/users/{user_id}/follow/")
+async def api_unfollow(
+    api_key: str = default_api_key,
+    user_id: int = default_path,
+) -> Union[ResponseWithBool, ErrorResponse]:
+    try:
+        follower = await check_user(session=ss, api_key=api_key)
+        await unfollow(ss, follower_id=follower.id, following_id=user_id)
         return ResponseWithBool(result=True)
-    else:
-        return ResponseWithBool(result=False)
+
+    except Exception as e:
+        return ErrorResponse(
+            result=False, error_type=type(e).__name__, error_message=str(e)
+        )
 
 
-@router.delete("/api/users/{user_id}/follow/", response_model=ResponseWithBool)
-async def api_follow(
-        api_key: str = Header(...),
-        user_id: int = Path(..., description="User ID")
-) -> ResponseWithBool:
-    follower: User = await get_user_by_key(session=ss, api_key=api_key)
+@router.get("/api/users/me")
+async def api_get_me(
+    api_key: str = default_api_key,
+) -> Union[MeResponceSchema, ErrorResponse]:
+    try:
+        me = await check_user(session=ss, api_key=api_key)
+        followers_ids = await get_followers(session=ss, user_id=me.id)
+        following_ids = await get_followings(session=ss, user_id=me.id)
 
-    if await unfollow(ss, follower_id=follower.id, following_id=user_id):
-        return ResponseWithBool(result=True)
-    else:
-        return ResponseWithBool(result=False)
+        followers = [FollowUserSchema(id=fr_id) for fr_id in followers_ids]
+        following = [FollowUserSchema(id=fg_id) for fg_id in following_ids]
+
+        user = UserSchema(
+            id=me.id,
+            followers=followers,
+            following=following,
+        )
+        return MeResponceSchema(result=True, user=user)
+
+    except Exception as e:
+        return ErrorResponse(
+            result=False, error_type=type(e).__name__, error_message=str(e)
+        )
+
+
+@router.get("/api/users/{user_id}")
+async def api_get_user(
+    user_id: int = default_path,
+) -> Union[MeResponceSchema, ErrorResponse]:
+    try:
+        me = await get_user_by_id(session=ss, user_id=user_id)
+        if not me:
+            raise HTTPException(404, "User not found")
+        followers_ids = await get_followers(session=ss, user_id=me.id)
+        following_ids = await get_followings(session=ss, user_id=me.id)
+
+        followers = [FollowUserSchema(id=fr_id) for fr_id in followers_ids]
+        following = [FollowUserSchema(id=fg_id) for fg_id in following_ids]
+
+        user = UserSchema(
+            id=me.id,
+            followers=followers,
+            following=following,
+        )
+        return MeResponceSchema(result=True, user=user)
+
+    except HTTPException as e:
+        return ErrorResponse(
+            result=False, error_type=type(e).__name__, error_message=str(e)
+        )

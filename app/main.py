@@ -5,16 +5,6 @@ from app.routes.tweet import router as tweet_router
 from app.routes.user import router as user_router
 from core.models import Base, db_helper
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     async with db_helper.engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.create_all)
-#
-#     yield
-#
-#
-# app = FastAPI(lifespan=lifespan)
-
 app = FastAPI()
 
 

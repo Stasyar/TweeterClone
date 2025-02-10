@@ -11,8 +11,3 @@ class User(Base):
     api_key = Column(String, unique=True, nullable=False)
 
     tweets = relationship("Tweet", backref="author")
-
-    def __repr__(self):
-        return f"User {self.id}"
-
-
