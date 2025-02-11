@@ -26,7 +26,7 @@ default_api_key = Header(...)
 default_path = Path(...)
 
 
-@router.post("/api/users/{user_id}/follow/")
+@router.post("/api/users/{user_id}/follow")
 async def api_follow(
     api_key: str = default_api_key,
     user_id: int = default_path,
@@ -45,7 +45,7 @@ async def api_follow(
         )
 
 
-@router.delete("/api/users/{user_id}/follow/")
+@router.delete("/api/users/{user_id}/follow")
 async def api_unfollow(
     api_key: str = default_api_key,
     user_id: int = default_path,

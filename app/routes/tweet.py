@@ -42,7 +42,7 @@ default_path = Path(...)
 default_files = File(...)
 
 
-@router.get("/api/tweets/", status_code=200)
+@router.get("/api/tweets", status_code=200)
 async def api_get_tweets_from_following(
     api_key: str = default_api_key,
 ) -> Union[TweetsGetResponse, ErrorResponse, None]:
@@ -82,7 +82,7 @@ async def api_get_tweets_from_following(
         )
 
 
-@router.post("/api/tweets/", status_code=201)
+@router.post("/api/tweets", status_code=201)
 async def api_post_tweet(
     data: TweetCreateRequest,
     api_key: str = default_api_key,
@@ -106,7 +106,7 @@ async def api_post_tweet(
         )
 
 
-@router.delete("/api/tweets/{tweet_id}/")
+@router.delete("/api/tweets/{tweet_id}")
 async def api_delete_tweet(
     api_key: str = default_api_key,
     tweet_id: int = default_path,
@@ -127,7 +127,7 @@ async def api_delete_tweet(
         )
 
 
-@router.post("/api/tweets/{tweet_id}/likes/")
+@router.post("/api/tweets/{tweet_id}/likes")
 async def api_like_tweet(
     api_key: str = default_api_key,
     tweet_id: int = default_path,
@@ -150,7 +150,7 @@ async def api_like_tweet(
         )
 
 
-@router.delete("/api/tweets/{tweet_id}/like/")
+@router.delete("/api/tweets/{tweet_id}/like")
 async def api_unlike_tweet(
     api_key: str = default_api_key,
     tweet_id: int = default_path,
@@ -172,7 +172,7 @@ async def api_unlike_tweet(
         )
 
 
-@router.post("/api/medias/")
+@router.post("/api/medias")
 async def api_media(
     file: UploadFile = default_files,
 ) -> BaseSchema:

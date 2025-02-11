@@ -26,7 +26,7 @@ async def check_user(
                 async_session.add(user)
                 await async_session.commit()
                 await async_session.refresh(user)
-            print("check user", user)
+
             return user
         except Exception as e:
             print(f"Error during user check: {e}")
@@ -56,7 +56,7 @@ async def get_followings(
         result = await async_session.execute(
             select(Follow.following_id).where(Follow.follower_id == user_id)
         )
-        print("followings_crud", result)
+
         return result.scalars().all()
 
 
@@ -67,20 +67,20 @@ async def get_followers(
         result = await async_session.execute(
             select(Follow.follower_id).where(Follow.following_id == user_id)
         )
-        print("followings_crud", result)
+
         return result.scalars().all()
 
 
 async def get_likes(
     session: sessionmaker[AsyncSession], tweet_id: int
 ) -> [Sequence[LikesSchema]]:
-    print("tweet_id crud", tweet_id, type(tweet_id))
+
     async with session() as async_session:
         result = await async_session.execute(
             select(Like.user_id).where(Like.tweet_id == tweet_id)
         )
         likes_user_ids = result.scalars().all()
-        print("likes crud", likes_user_ids)
+
         return [LikesSchema(user_id=us_id) for us_id in likes_user_ids]
 
 
@@ -103,7 +103,7 @@ async def get_author_info(
             select(User).where(User.id == user_id)
         )
         user = result.scalars().first()
-        print("author_crud", user)
+
         return AuthorSchema(id=user.id)
 
 
