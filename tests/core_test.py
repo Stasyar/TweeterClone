@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+db_url: str = "postgresql+asyncpg://postgres:postgres@db:5432/test_db"
+
 
 class DBHelper:
     def __init__(self, url: str, echo: bool = False):
@@ -13,3 +15,6 @@ class DBHelper:
             autocommit=False,
             expire_on_commit=False,
         )
+
+
+db_helper = DBHelper(url=db_url, echo=False)

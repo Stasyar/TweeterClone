@@ -1,37 +1,19 @@
 import uvicorn
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes.tweet import router as tweet_router
-from app.routes.user import router as user_router
-from core.models import Base, db_helper
+from app.app_factory import create_app
+from app.routes.tweet import register_tweet_routers
+from app.routes.user import register_user_routers
+from core.config import settings
+from core.models import DBHelper
 
-app = FastAPI()
+db_helper = DBHelper(url=settings.db_url, echo=False)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+ss = db_helper.session
 
 
-@app.on_event("startup")
-async def startup():
-    async with db_helper.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    print("База данных создана и подключена.")
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await db_helper.engine.dispose()
-    print("Соединение с базой данных закрыто.")
-
-
-app.include_router(tweet_router)
-app.include_router(user_router)
+app = create_app(db_hpr=db_helper)
+register_tweet_routers(app=app, ss=ss)
+register_user_routers(app=app, ss=ss)
 
 
 if __name__ == "__main__":

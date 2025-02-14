@@ -10,6 +10,7 @@ __all__ = (
     "UserSchema",
     "FollowUserSchema",
     "MeResponceSchema",
+    "MediaUploadResponse",
 )
 
 
@@ -19,5 +20,9 @@ from app.schemas.get_all_tweets import (
     TweetsGetResponse,
     TweetsSchema,
 )
-from app.schemas.tweet import TweetCreateRequest, TweetCreateResponse
+from app.schemas.tweet import (
+    MediaUploadResponse,
+    TweetCreateRequest,
+    TweetCreateResponse,
+)
 from app.schemas.user import FollowUserSchema, MeResponceSchema, UserSchema

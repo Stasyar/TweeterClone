@@ -170,6 +170,8 @@ async def delete_like_tweet(
             await async_session.delete(like)
             await async_session.commit()
             return True
+        else:
+            return False
 
 
 async def follow(
@@ -216,4 +218,13 @@ async def upload_media(
         await async_session.commit()
         await async_session.refresh(media)
 
-    return media.id
+        return media.id
+
+
+async def get_links(session: sessionmaker[AsyncSession], media_id: int) -> str:
+    async with session() as async_session:
+        result = await async_session.execute(
+            select(Media.filename).where(Media.id == media_id)
+        )
+        res = result.scalars().first()
+        return f"http://localhost/{res}"

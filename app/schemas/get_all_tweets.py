@@ -16,7 +16,7 @@ class AuthorSchema(BaseSchema):
 class TweetsSchema(BaseSchema):
     id: int
     content: str
-    attachments: Optional[List[int]] = None
+    attachments: Optional[List[str]] = None
     author: AuthorSchema
     likes: Optional[Sequence[LikesSchema]] = None
 

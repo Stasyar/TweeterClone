@@ -4,10 +4,15 @@ from app.schemas import BaseSchema
 
 
 class TweetCreateRequest(BaseSchema):
-    content: str
-    media: Optional[List[int]] = None
+    tweet_data: str
+    tweet_media_ids: Optional[List[int]] = None
 
 
 class TweetCreateResponse(BaseSchema):
     result: bool
     tweet_id: int
+
+
+class MediaUploadResponse(BaseSchema):
+    result: bool
+    media_id: int
