@@ -1,18 +1,15 @@
-import pytest
-from core_test import db_url
-from httpx import ASGITransport, AsyncClient
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 
-from app.app_factory import create_app
-
-
-@pytest.fixture(scope="function")
-def app():
-    return create_app(database_url=db_url)
+from app.main import app
 
 
-@pytest.fixture
-def client():
-    return AsyncClient(
+@pytest_asyncio.fixture(scope="session")
+async def ac():
+    async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
-    )
+    ) as async_test_client:
+        yield async_test_client
+
+

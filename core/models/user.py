@@ -9,5 +9,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     api_key = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=True)
 
     tweets = relationship("Tweet", backref="author")

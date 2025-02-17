@@ -11,7 +11,7 @@ from core.models import Follow, Like, Media, Tweet, User
 
 
 async def check_user(
-    session: sessionmaker[AsyncSession], api_key: str
+    session: sessionmaker[AsyncSession], api_key: str,
 ) -> Optional[User]:
     async with session() as async_session:
 

@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from core.config import settings
 
 
 class DBHelper:
@@ -13,3 +14,6 @@ class DBHelper:
             autocommit=False,
             expire_on_commit=False,
         )
+
+
+db_helper = DBHelper(url=settings.db_url, echo=False)

@@ -18,15 +18,4 @@ def create_app(db_hpr) -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.on_event("startup")
-    async def startup():
-        async with db_hpr.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        print("База данных создана и подключена.")
-
-    @app.on_event("shutdown")
-    async def shutdown():
-        await db_hpr.engine.dispose()
-        print("Соединение с базой данных закрыто.")
-
     return app

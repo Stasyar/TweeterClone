@@ -65,14 +65,21 @@ def register_user_routers(app, ss):
             followers_ids = await get_followers(session=ss, user_id=me.id)
             following_ids = await get_followings(session=ss, user_id=me.id)
 
-            followers = [
-                FollowUserSchema(id=fr_id, name=None)
-                for fr_id in followers_ids
-            ]
-            following = [
-                FollowUserSchema(id=fg_id, name=None)
-                for fg_id in following_ids
-            ]
+            if followers_ids:
+                followers = [
+                    FollowUserSchema(id=fr_id, name=None)
+                    for fr_id in followers_ids
+                ]
+            else:
+                followers = None
+
+            if following_ids:
+                following = [
+                    FollowUserSchema(id=fg_id, name=None)
+                    for fg_id in following_ids
+                ]
+            else:
+                following = None
 
             user = UserSchema(
                 id=me.id,
@@ -98,14 +105,21 @@ def register_user_routers(app, ss):
             followers_ids = await get_followers(session=ss, user_id=me.id)
             following_ids = await get_followings(session=ss, user_id=me.id)
 
-            followers = [
-                FollowUserSchema(id=fr_id, name=None)
-                for fr_id in followers_ids
-            ]
-            following = [
-                FollowUserSchema(id=fg_id, name=None)
-                for fg_id in following_ids
-            ]
+            if followers_ids:
+                followers = [
+                    FollowUserSchema(id=fr_id, name=None)
+                    for fr_id in followers_ids
+                ]
+            else:
+                followers = None
+
+            if following_ids:
+                following = [
+                    FollowUserSchema(id=fg_id, name=None)
+                    for fg_id in following_ids
+                ]
+            else:
+                following = None
 
             user = UserSchema(
                 id=me.id,
