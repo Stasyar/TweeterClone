@@ -1,15 +1,31 @@
 import uvicorn
-
-from app.app_factory import create_app
-from app.routes.tweet import register_tweet_routers
-from app.routes.user import register_user_routers
 from core.models import db_helper, Base
 
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
+
+from app.routes.tweet import register_tweet_routers
+from app.routes.user import register_user_routers
+
+
+
+
 ss = db_helper.session
+app = FastAPI()
+app.mount("/medias", StaticFiles(directory="medias"), name="medias")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-app = create_app(db_hpr=db_helper)
+register_tweet_routers(app=app, ss=ss)
+register_user_routers(app=app, ss=ss)
 
 
 @app.on_event("startup")
@@ -24,9 +40,6 @@ async def shutdown():
     await db_helper.engine.dispose()
     print("Соединение с базой данных закрыто.")
 
-
-register_tweet_routers(app=app, ss=ss)
-register_user_routers(app=app, ss=ss)
 
 
 if __name__ == "__main__":
