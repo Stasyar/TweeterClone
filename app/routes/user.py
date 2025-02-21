@@ -1,7 +1,7 @@
 from typing import Union
 
-from fastapi import Header, HTTPException, Path
-
+from fastapi import Header, HTTPException, Path, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud import (
     check_user,
     follow,
@@ -17,14 +17,17 @@ from app.schemas import (
     ResponseWithBool,
     UserSchema,
 )
+from core.models import db_helper
 
 default_api_key = Header(...)
 default_path = Path(...)
 
 
-def register_user_routers(app, ss):
+
+def register_user_routers(app):
     @app.post("/api/users/{user_id}/follow")
     async def api_follow(
+        ss:AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
         user_id: int = default_path,
     ) -> Union[ResponseWithBool, ErrorResponse]:
@@ -43,6 +46,7 @@ def register_user_routers(app, ss):
 
     @app.delete("/api/users/{user_id}/follow")
     async def api_unfollow(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
         user_id: int = default_path,
     ) -> Union[ResponseWithBool, ErrorResponse]:
@@ -58,6 +62,7 @@ def register_user_routers(app, ss):
 
     @app.get("/api/users/me")
     async def api_get_me(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
     ) -> Union[MeResponceSchema, ErrorResponse]:
         try:
@@ -96,6 +101,7 @@ def register_user_routers(app, ss):
 
     @app.get("/api/users/{user_id}")
     async def api_get_user(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         user_id: int = default_path,
     ) -> Union[MeResponceSchema, ErrorResponse]:
         try:

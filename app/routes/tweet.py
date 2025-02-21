@@ -9,8 +9,9 @@ from fastapi import (
     File,
     Header,
     Path,
-    UploadFile,
+    UploadFile, Depends,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import UPLOAD_FOLDER
 from app.crud import (
@@ -37,7 +38,7 @@ from app.schemas import (
     TweetsGetResponse,
     TweetsSchema,
 )
-from core.models import Tweet
+from core.models import Tweet, db_helper
 
 router = APIRouter()
 default_files = File(...)
@@ -45,9 +46,10 @@ default_api_key = Header(...)
 default_path = Path(...)
 
 
-def register_tweet_routers(app, ss):
+def register_tweet_routers(app):
     @app.post("/api/tweets/{tweet_id}/likes")
     async def api_like_tweet(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
         tweet_id: int = default_path,
     ) -> Union[ResponseWithBool, ErrorResponse]:
@@ -70,6 +72,7 @@ def register_tweet_routers(app, ss):
 
     @app.delete("/api/tweets/{tweet_id}/likes")
     async def api_unlike_tweet(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
         tweet_id: int = default_path,
     ) -> Union[ResponseWithBool, ErrorResponse]:
@@ -90,6 +93,7 @@ def register_tweet_routers(app, ss):
 
     @app.delete("/api/tweets/{tweet_id}")
     async def api_delete_tweet(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
         tweet_id: int = default_path,
     ) -> Union[ResponseWithBool, ErrorResponse]:
@@ -110,6 +114,7 @@ def register_tweet_routers(app, ss):
 
     @app.get("/api/tweets", status_code=200)
     async def api_get_tweets_from_following(
+            ss: AsyncSession = Depends(db_helper.session_getter),
         api_key: str = default_api_key,
     ) -> Union[TweetsGetResponse, ErrorResponse, None]:
         try:
@@ -164,6 +169,7 @@ def register_tweet_routers(app, ss):
     async def api_post_tweet(
         data: TweetCreateRequest,
         api_key: str = default_api_key,
+            ss: AsyncSession = Depends(db_helper.session_getter),
     ) -> Union[TweetCreateResponse, ErrorResponse]:
         try:
             user = await check_user(session=ss, api_key=api_key)
@@ -184,6 +190,7 @@ def register_tweet_routers(app, ss):
     @app.post("/api/medias")
     async def api_media(
         file: UploadFile = default_files,
+            ss: AsyncSession = Depends(db_helper.session_getter),
     ) -> Union[MediaUploadResponse, BaseSchema]:
 
         try:
