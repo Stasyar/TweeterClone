@@ -10,7 +10,7 @@ async def test_main_route(client):
 
 
 @pytest.mark.asyncio
-async def test_get_me(client, prepare_db, db_session):
+async def test_get_me(client):
     """Проверяем, данные при запросе нашего профиля."""
     response = client.get("/api/users/me", headers={"api-key": "test_1"})
     user_data = response.json()

@@ -3,9 +3,9 @@ services:
     image: postgres:13
     container_name: postgres-db
     environment:
-      POSTGRES_DB: ${db_name}
-      POSTGRES_USER: ${db_user}
-      POSTGRES_PASSWORD: ${db_pass}
+      POSTGRES_DB: microservice
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -20,10 +20,8 @@ services:
       POSTGRES_DB: test_db
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-    volumes:
-      - test_pgdata:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5433:5433"
     networks:
       - twitter-clone
 
@@ -55,7 +53,6 @@ services:
 
 volumes:
   pgdata:
-  test_pgdata:
 
 networks:
   twitter-clone:

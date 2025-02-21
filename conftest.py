@@ -14,7 +14,14 @@ from app.main import app
 from fill_bd import insert_data
 
 
-TEST_DATABASE_URL = f"postgresql+asyncpg://test:test@test_db:5433/test_db"
+ENV_FILE = ".env.test"
+load_dotenv(ENV_FILE)
+
+DB_PASS = os.getenv("db_pass")
+DB_USER = os.getenv("db_user")
+DB_NAME = os.getenv("db_name")
+
+TEST_DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@test_db:5433/{DB_NAME}"
 
 
 test_engine = create_async_engine(url=TEST_DATABASE_URL, echo=True)
@@ -24,6 +31,14 @@ test_session = async_sessionmaker(
     autocommit=False,
     expire_on_commit=False,
     )
+
+
+async def override_get_session() -> AsyncGenerator[AsyncSession, None]:
+    async with test_session() as session:
+        yield session
+
+app.dependency_overrides[db_helper.session_getter] = override_get_session
+print("База данный переопределена")
 
 
 @pytest_asyncio.fixture(autouse=True, scope="session")
@@ -48,14 +63,6 @@ async def db_session():
     async with test_session() as session:
         yield session
         await session.close()
-
-
-async def override_get_session() -> AsyncGenerator[AsyncSession, None]:
-    async with test_session() as session:
-        yield session
-
-app.dependency_overrides[db_helper.session_getter] = override_get_session
-print("База данный переопределена")
 
 
 @pytest.fixture

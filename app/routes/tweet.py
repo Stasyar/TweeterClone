@@ -40,7 +40,6 @@ from app.schemas import (
 )
 from core.models import Tweet, db_helper
 
-router = APIRouter()
 default_files = File(...)
 default_api_key = Header(...)
 default_path = Path(...)
