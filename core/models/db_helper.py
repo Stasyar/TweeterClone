@@ -1,10 +1,12 @@
+import asyncio
 from typing import AsyncGenerator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from core.config import settings
+from core.models import Base
 
 
 class DBHelper:
@@ -21,8 +23,11 @@ class DBHelper:
             expire_on_commit=False,
         )
 
+    async def dispose(self) -> None:
+        await self.engine.dispose()
+
     async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
-        async with db_helper.session() as async_session:
+        async with self.session() as async_session:
             yield async_session
 
 
