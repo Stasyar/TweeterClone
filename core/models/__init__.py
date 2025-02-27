@@ -17,4 +17,4 @@ from core.models.like import Like
 from core.models.media import Media
 from core.models.tweet import Tweet
 from core.models.user import User
-from core.models.fill_bd import insert_data
+from tests.fill_bd import insert_data

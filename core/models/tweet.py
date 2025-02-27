@@ -1,4 +1,5 @@
 from sqlalchemy import ARRAY, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 from core.models.base import Base
 
@@ -6,7 +7,13 @@ from core.models.base import Base
 class Tweet(Base):
     __tablename__ = "tweet"
 
-    id = Column(Integer, primary_key=True, nullable=False)
-    author_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    content = Column(String(280), nullable=False)
+    id: int = Column(Integer, primary_key=True, nullable=False)
+    author_id: int = Column(
+        Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
+    content: str = Column(String(280), nullable=False)
     media = Column(ARRAY(Integer), nullable=True)
+
+    likes = relationship(
+        "Like", backref="tweet", cascade="all, delete", passive_deletes=True
+    )

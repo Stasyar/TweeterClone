@@ -1,12 +1,12 @@
-import asyncio
 from typing import AsyncGenerator
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from core.config import settings
-from core.models import Base
 
 
 class DBHelper:
@@ -32,4 +32,3 @@ class DBHelper:
 
 
 db_helper = DBHelper(url=settings.db_url, echo=False)
-

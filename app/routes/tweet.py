@@ -5,12 +5,14 @@ from typing import Union
 
 import aiofiles
 from fastapi import (
-    APIRouter,
+    Depends,
     File,
     Header,
+    HTTPException,
     Path,
-    UploadFile, Depends,
+    UploadFile,
 )
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import UPLOAD_FOLDER
@@ -40,18 +42,38 @@ from app.schemas import (
 )
 from core.models import Tweet, db_helper
 
-default_files = File(...)
-default_api_key = Header(...)
-default_path = Path(...)
+DEFAULT_FILES = File(...)
+DEFAULT_API_KEY = Header(...)
+DEFAULT_PATH = Path(...)
+DEPENDENCY = Depends(db_helper.session_getter)
 
 
-def register_tweet_routers(app):
+def register_tweet_routers(app) -> None:
+    """
+    Функция для регистрации эндпоинтов /api/tweet и api/media
+
+    :param app: FastAPI приложение
+    :return: None
+    """
+
     @app.post("/api/tweets/{tweet_id}/likes")
     async def api_like_tweet(
-            ss: AsyncSession = Depends(db_helper.session_getter),
-        api_key: str = default_api_key,
-        tweet_id: int = default_path,
+        ss: AsyncSession = DEPENDENCY,
+        api_key: str = DEFAULT_API_KEY,
+        tweet_id: int = DEFAULT_PATH,
     ) -> Union[ResponseWithBool, ErrorResponse]:
+        """
+        Обработчик событий POST endpoint /api/tweets/{tweet_id}/likes
+
+        :param ss: Асинхронная сессия
+        :param api_key: Ключ аутентификации пользователя (по умолчанию - test)
+        :param tweet_id: id пользователя из строки запроса
+        :return: - При успешной отработке: json с  ответом {"result": "True"}
+                 - При неуспешной отработке: json с  ответом
+                   {"result": "False"}
+                 - При возникновении исключения: json с  ответом
+                 {"result": "False", "error_type": str, "error_message": str}
+        """
 
         try:
             user = await check_user(session=ss, api_key=api_key)
@@ -64,17 +86,36 @@ def register_tweet_routers(app):
                     return ResponseWithBool(result=True)
             else:
                 return ResponseWithBool(result=False)
-        except Exception as e:
+        except SQLAlchemyError as e:
+            await ss.rollback()
+            raise HTTPException(status_code=500, detail=e)
+        except ValueError as e:
+            return ErrorResponse(
+                result=False, error_type=type(e).__name__, error_message=str(e)
+            )
+        except HTTPException as e:
             return ErrorResponse(
                 result=False, error_type=type(e).__name__, error_message=str(e)
             )
 
     @app.delete("/api/tweets/{tweet_id}/likes")
     async def api_unlike_tweet(
-            ss: AsyncSession = Depends(db_helper.session_getter),
-        api_key: str = default_api_key,
-        tweet_id: int = default_path,
+        ss: AsyncSession = DEPENDENCY,
+        api_key: str = DEFAULT_API_KEY,
+        tweet_id: int = DEFAULT_PATH,
     ) -> Union[ResponseWithBool, ErrorResponse]:
+        """
+        Обработчик событий DELETE endpoint /api/tweets/{tweet_id}/likes"
+
+        :param ss: Асинхронная сессия
+        :param api_key: Ключ аутентификации пользователя (по умолчанию - test)
+        :param tweet_id: id пользователя из строки запроса
+        :return: - При успешной отработке: json с  ответом {"result": "True"}
+                 - При неуспешной отработке: json с  ответом
+                   {"result": "False"}
+                 - При возникновении исключения: json с  ответом
+                 {"result": "False", "error_type": str, "error_message": str}
+        """
 
         try:
             user = await check_user(session=ss, api_key=api_key)
@@ -85,17 +126,36 @@ def register_tweet_routers(app):
                 return ResponseWithBool(result=True)
             else:
                 return ResponseWithBool(result=False)
-        except Exception as e:
+        except SQLAlchemyError as e:
+            await ss.rollback()
+            raise HTTPException(status_code=500, detail=e)
+        except ValueError as e:
+            return ErrorResponse(
+                result=False, error_type=type(e).__name__, error_message=str(e)
+            )
+        except HTTPException as e:
             return ErrorResponse(
                 result=False, error_type=type(e).__name__, error_message=str(e)
             )
 
     @app.delete("/api/tweets/{tweet_id}")
     async def api_delete_tweet(
-            ss: AsyncSession = Depends(db_helper.session_getter),
-        api_key: str = default_api_key,
-        tweet_id: int = default_path,
+        ss: AsyncSession = DEPENDENCY,
+        api_key: str = DEFAULT_API_KEY,
+        tweet_id: int = DEFAULT_PATH,
     ) -> Union[ResponseWithBool, ErrorResponse]:
+        """
+        Обработчик событий DELETE endpoint /api/tweets/{tweet_id}"
+
+        :param ss: Асинхронная сессия
+        :param api_key: Ключ аутентификации пользователя (по умолчанию - test)
+        :param tweet_id: id пользователя из строки запроса
+        :return: - При успешной отработке: json с  ответом {"result": "True"}
+                 - При неуспешной отработке: json с  ответом
+                   {"result": "False"}
+                 - При возникновении исключения: json с  ответом
+                 {"result": "False", "error_type": str, "error_message": str}
+        """
 
         try:
             user = await check_user(session=ss, api_key=api_key)
@@ -106,16 +166,35 @@ def register_tweet_routers(app):
                     return ResponseWithBool(result=True)
             else:
                 return ResponseWithBool(result=False)
-        except Exception as e:
+        except SQLAlchemyError as e:
+            await ss.rollback()
+            raise HTTPException(status_code=500, detail=e)
+        except ValueError as e:
+            return ErrorResponse(
+                result=False, error_type=type(e).__name__, error_message=str(e)
+            )
+        except HTTPException as e:
             return ErrorResponse(
                 result=False, error_type=type(e).__name__, error_message=str(e)
             )
 
     @app.get("/api/tweets", status_code=200)
     async def api_get_tweets_from_following(
-            ss: AsyncSession = Depends(db_helper.session_getter),
-        api_key: str = default_api_key,
+        ss: AsyncSession = DEPENDENCY,
+        api_key: str = DEFAULT_API_KEY,
     ) -> Union[TweetsGetResponse, ErrorResponse, None]:
+        """
+        Обработчик событий GET endpoint /api/tweets"
+
+        :param ss: Асинхронная сессия
+        :param api_key: Ключ аутентификации пользователя (по умолчанию - test)
+        :return: - При успешной отработке: json с  ответом {"result": "True"}
+                 - При неуспешной отработке: json с  ответом
+                   {"result": "False"}
+                 - При возникновении исключения: json с  ответом
+                 {"result": "False", "error_type": str, "error_message": str}
+                 - При отсутствии ответа: None
+        """
         try:
             user = await check_user(session=ss, api_key=api_key)
             followings_ids = await get_followings(session=ss, user_id=user.id)
@@ -159,7 +238,14 @@ def register_tweet_routers(app):
             schemed_tweets = [tw[0] for tw in sorted_tweets]
 
             return TweetsGetResponse(result=True, tweets=schemed_tweets)
-        except Exception as e:
+        except SQLAlchemyError as e:
+            await ss.rollback()
+            raise HTTPException(status_code=500, detail=e)
+        except ValueError as e:
+            return ErrorResponse(
+                result=False, error_type=type(e).__name__, error_message=str(e)
+            )
+        except HTTPException as e:
             return ErrorResponse(
                 result=False, error_type=type(e).__name__, error_message=str(e)
             )
@@ -167,9 +253,21 @@ def register_tweet_routers(app):
     @app.post("/api/tweets", status_code=201)
     async def api_post_tweet(
         data: TweetCreateRequest,
-        api_key: str = default_api_key,
-            ss: AsyncSession = Depends(db_helper.session_getter),
+        api_key: str = DEFAULT_API_KEY,
+        ss: AsyncSession = DEPENDENCY,
     ) -> Union[TweetCreateResponse, ErrorResponse]:
+        """
+        Обработчик событий POST endpoint /api/tweets"
+
+        :param data: json {"tweet_data": str, "tweet_media": List[int]"
+        :param ss: Асинхронная сессия
+        :param api_key: Ключ аутентификации пользователя (по умолчанию - test)
+        :return: - При успешной отработке: json с  ответом {"result": "True"}
+                 - При неуспешной отработке: json с  ответом
+                   {"result": "False"}
+                 - При возникновении исключения: json с  ответом
+                 {"result": "False", "error_type": str, "error_message": str}
+        """
         try:
             user = await check_user(session=ss, api_key=api_key)
             new_tweet: Tweet = Tweet(
@@ -181,16 +279,33 @@ def register_tweet_routers(app):
             tweet: Tweet = await post_tweet(ss, new_tweet)
             return TweetCreateResponse(result=True, tweet_id=tweet.id)
 
-        except Exception as e:
+        except SQLAlchemyError as e:
+            await ss.rollback()
+            raise HTTPException(status_code=500, detail=e)
+        except ValueError as e:
+            return ErrorResponse(
+                result=False, error_type=type(e).__name__, error_message=str(e)
+            )
+        except HTTPException as e:
             return ErrorResponse(
                 result=False, error_type=type(e).__name__, error_message=str(e)
             )
 
     @app.post("/api/medias")
     async def api_media(
-        file: UploadFile = default_files,
-            ss: AsyncSession = Depends(db_helper.session_getter),
+        file: UploadFile = DEFAULT_FILES,
+        ss: AsyncSession = DEPENDENCY,
     ) -> Union[MediaUploadResponse, BaseSchema]:
+        """
+        Обработчик событий DELETE endpoint /api/medias"
+
+        :param file: Загруженный файл изображения
+        :param ss: Асинхронная сессия
+        :param api_key: Ключ аутентификации пользователя (по умолчанию - test)
+        :return: - При успешной отработке: json с  ответом и media id
+                 - При неуспешной отработке: json с  ответом
+                   {"result": "False"}
+        """
 
         try:
             first_bytes = await file.read(5120)
@@ -217,7 +332,14 @@ def register_tweet_routers(app):
 
             media_id = await upload_media(session=ss, file_path=file_path)
             return MediaUploadResponse(result=True, media_id=media_id)
-        except Exception as e:
+        except SQLAlchemyError as e:
+            await ss.rollback()
+            raise HTTPException(status_code=500, detail=e)
+        except ValueError as e:
+            return ErrorResponse(
+                result=False, error_type=type(e).__name__, error_message=str(e)
+            )
+        except HTTPException as e:
             return ErrorResponse(
                 result=False, error_type=type(e).__name__, error_message=str(e)
             )
