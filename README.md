@@ -35,6 +35,67 @@
 
 ### Сборка и запуск приложения
 
-Подразумевается что у вас уже установлен Python и Docker (Python можно установить 
-здесь:, Docker:).
+Подразумевается что у вас уже установлен [Python](https://www.python.org/downloads/) 
+и [Docker](https://www.docker.com/products/docker-desktop/)
+
+1. Сначала нужно сделать пул проекта из gitlab.
+
+```
+git clone https://gitlab.skillbox.ru/anastasiia_pushkareva/python_advanced_diploma.git
+```
+
+2. Поскольку управление зависимостями осуществляет Poetry, 
+необходимо установить его активировать среду.
+
+```
+pipx install poetry
+
+poetry install --no-root
+```
+
+3. Перед первой сборкой контейнеров разкоментируйте строки:
+
+![Изображение](screenshots/2.png)
+
+При последующих запусках приложения их нужно закоментировать, 
+иначе все данные в базе данных перезапишутся. 
+
+Задайте свои переменные.
+
+![Изображение](screenshots/1.png)
+
+Затем запустите docker compose.
+
+```
+docker compose -f docker-compose.yml build
+
+docker compose -f docker-compose.yml up
+```
+
+![Изображение](screenshots/3.png)
+
+
+Приложение запущено и доступно по адресу предоставленному провайдером если 
+вы запускаете на удаленном сервере.
+
+![Изображение](screenshots/5.png)
+
+![Изображение](screenshots/6.png)
+
+Документация доступна по адресу http://<your_domain>:8000/docs/
+
+![Изображение](screenshots/4.png)
+
+### Для тестирования:
+1. Для тестирования нужно запустить другой контейнер с тестовой базой данных.
+
+```
+docker compose -f docker-compose.dev.yml up -d
+```
+
+2. Запустите тесты.
+
+```
+poetry run pytest
+```
 

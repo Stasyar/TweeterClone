@@ -14,7 +14,7 @@ from core.models import Base, db_helper
 from tests.fill_bd import insert_data
 
 test_db_url = (
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/microservice"
+    "postgresql+asyncpg://test:test@localhost:5432/test_db"
 )
 
 
