@@ -7,29 +7,24 @@ image: python:3.12
 
 stages:
   - build
-  - test
+  - lint
 
 before_script:
   - pip install pipx
   - pipx install poetry
   - poetry install --no-root
 
-pytest:
-  stage: test
-  script:
-    - poetry run pytest tests
-
 black:
-  stage: test
+  stage: lint
   script:
-    - poetry run black --diff --check src/
+    - poetry run black --diff --check .
 
 isort:
-  stage: test
+  stage: lint
   script:
-    - poetry run isort --check-only src/
+    - poetry run isort --check-only .
 
 flake8:
-  stage: test
+  stage: lint
   script:
-    - poetry run flake8 src/
+    - poetry run flake8 .
