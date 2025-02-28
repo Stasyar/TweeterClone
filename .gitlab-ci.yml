@@ -1,24 +1,35 @@
-stages:
-  - lint_and_test
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH
 
-lint_and_test:
-  image: python:3.11
-  stage: lint_and_test
-  before_script:
-    - pip install poetry
-    - docker compose build
-    - docker compose up
+image: python:3.12
+
+stages:
+  - build
+  - test
+
+before_script:
+  - pip install pipx
+  - pipx install poetry
+  - poetry install --no-root
+
+pytest:
+  stage: test
   script:
-    - poetry install --no-dev
-    - poetry install --dev
-    - poetry run black --check .
-    - poetry run isort --check --profile black .
-    - poetry run flake8 .
-    - poetry run mypy .
-    - poetry run pytest
-  services:
-    - docker:27.4.0
-  variables:
-    DOCKER_DRIVER: overlay2
-  after_script:
-    - docker-compose down
+    - poetry run pytest tests
+
+black:
+  stage: test
+  script:
+    - poetry run black --diff --check src/
+
+isort:
+  stage: test
+  script:
+    - poetry run isort --check-only src/
+
+flake8:
+  stage: test
+  script:
+    - poetry run flake8 src/
