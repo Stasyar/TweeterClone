@@ -21,19 +21,20 @@ app.add_middleware(
 
 # Закоментировать после первого запуска приложения и во время тестов.
 
-# @app.on_event("startup")
-# async def startup():
-#     async with db_helper.engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.drop_all)
-#         await conn.run_sync(Base.metadata.create_all)
-#         await insert_data(conn)
-#     print("База данных создана и подключена.")
-#
-#
-# @app.on_event("shutdown")
-# async def shutdown():
-#     await db_helper.engine.dispose()
-#     print("Соединение с базой данных закрыто.")
+
+@app.on_event("startup")
+async def startup():
+    async with db_helper.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+        await insert_data(conn)
+    print("База данных создана и подключена.")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await db_helper.engine.dispose()
+    print("Соединение с базой данных закрыто.")
 
 
 register_tweet_routers(app=app)

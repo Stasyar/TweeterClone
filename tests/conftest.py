@@ -13,9 +13,7 @@ from app.main import app
 from core.models import Base, db_helper
 from tests.fill_bd import insert_data
 
-test_db_url = (
-    "postgresql+asyncpg://test:test@localhost:5432/test_db"
-)
+test_db_url = "postgresql+asyncpg://test:test@localhost:5432/test_db"
 
 
 test_engine = create_async_engine(test_db_url, poolclass=NullPool, echo=False)
