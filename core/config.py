@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@db:5432/microservice"
+DATABASE_URL = "postgresql+asyncpg://user:password@db:5432/your_db"
 
 
 class Settings(BaseSettings):
