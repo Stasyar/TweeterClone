@@ -1,5 +1,7 @@
+import os
 from typing import Optional, Sequence
-
+import bcrypt
+from dotenv import load_dotenv
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,6 +10,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas import LikesSchema
 from app.schemas.get_all_tweets import AuthorSchema
 from core.models import Follow, Like, Media, Tweet, User
+
+load_dotenv()
+app_host: str = os.getenv("app_host")
+
+
+async def hash_api_key(api_key: str) -> str:
+    """Хеширует API-ключ перед сохранением в БД."""
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(api_key.encode(), salt).decode()
+
+
+async def verify_api_key(api_key: str, hashed_key: str) -> bool:
+    """Проверяет, совпадает ли API-ключ с хешем в БД."""
+    return bcrypt.checkpw(api_key.encode(), hashed_key.encode())
 
 
 async def check_user(
@@ -25,13 +41,19 @@ async def check_user(
     """
 
     try:
-        result = await session.execute(
-            select(User).where(User.api_key == api_key)
-        )
-        user = result.scalars().first()
+        result = await session.execute(select(User))
+        all_users = result.scalars().all()  # Достаем всех пользователей из бд
 
+        user = None
+        # Проверяем api_key пользователей если находим совпадение присваиваем его user
+        for u in all_users:
+            if await verify_api_key(api_key, u.api_key):
+                user = u
+
+        # Если юзера в бд нет то хешируем api_key и добавляем в бд
         if user is None:
-            user = User(api_key=api_key)
+            hashed_key = await hash_api_key(api_key)
+            user = User(api_key=hashed_key)
             session.add(user)
             await session.commit()
             await session.refresh(user)
@@ -217,6 +239,27 @@ async def post_tweet(session: AsyncSession, tweet: Tweet) -> Tweet:
         raise
 
 
+
+async def delete_imagefile(file_path) -> bool:
+    """
+    Удаляет картинку с сервера
+    :param file_path: путь к файлу на сервере
+    :return: True/False
+    """
+    try:
+        os.remove(file_path)
+        return True
+    except FileNotFoundError:
+        print("Файл не найден.")
+    except PermissionError:
+        print("Недостаточно прав для удаления файла.")
+    except IsADirectoryError:
+        print("Ожидался файл, но передана папка.")
+    except OSError as e:
+        print(f"Ошибка при удалении файла: {e}")
+    return False
+
+
 async def delete_tweet(session: AsyncSession, tweet_id: int) -> bool:
     """
     Удаляет твит по его id.
@@ -233,6 +276,15 @@ async def delete_tweet(session: AsyncSession, tweet_id: int) -> bool:
         tweet = result.scalars().first()
         if not tweet:
             raise ValueError("Tweet not found")
+        for media_id in tweet.media:
+            result_ = await session.execute(
+                select(Media.filename).where(Media.id == media_id)
+            )
+            file_path = result_.scalars().first()
+            deleted = await delete_imagefile(file_path)
+
+            if not deleted:
+                raise ValueError("Ошибка при удалении файла")
 
         await session.delete(tweet)
         await session.commit()
@@ -398,7 +450,7 @@ async def get_links(session: AsyncSession, media_id: int) -> str:
             select(Media.filename).where(Media.id == media_id)
         )
         res = result.scalars().first()
-        return f"http://localhost/{res}"
+        return f"http://{app_host}/{res}"
     except SQLAlchemyError as e:
         print(f"Error during get_links (database error): {e}")
         await session.rollback()
