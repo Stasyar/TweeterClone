@@ -1,3 +1,4 @@
+import bcrypt
 from sqlalchemy import insert
 
 from core.models import Follow, Like, Media, Tweet, User
@@ -34,6 +35,9 @@ followed_data = [
 
 image_data = {"filename": "medias/image_for_test.jpg"}
 
+for u in users_data:
+    salt = bcrypt.gensalt()
+    u["api_key"] = bcrypt.hashpw(u["api_key"].encode(), salt).decode()
 
 async def insert_data(conn):
     await conn.execute(insert(Media), image_data)
