@@ -31,12 +31,12 @@ async def test_create_tweet(ac: AsyncClient):
 
 async def test_delete_tweet(ac: AsyncClient):
     """Проверяем как удаляется твит."""
-    response = await ac.delete("/api/tweets/1", headers={"api-key": "test_1"})
+    response = await ac.delete("/api/tweets/2", headers={"api-key": "test_2"})
     response_data = response.json()
     assert response.status_code == 200
     assert response_data == get_result
 
-    response = await ac.get("/api/tweets", headers={"api-key": "test_1"})
+    response = await ac.get("/api/tweets", headers={"api-key": "test_2"})
     tweet_data = response.json()
     assert response.status_code == 200
     assert tweet_data == get_tweets_after_delete

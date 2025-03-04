@@ -22,12 +22,12 @@ get_tweets_after_delete = {
     "result": True,
     "tweets": [
         {
-            "id": 2,
-            "content": "Текст для теста твита 2",
-            "attachments": [],
-            "author": {"id": 2, "name": None},
-            "likes": [{"user_id": 1, "name": None}],
-        }
+            "id": 1,
+            "content": "Текст для теста твита 1",
+            "attachments": ["http://localhost/medias/image_for_test.jpg"],
+            "author": {"id": 1, "name": None},
+            "likes": [{"user_id": 2, "name": None}],
+        },
     ],
 }
 
